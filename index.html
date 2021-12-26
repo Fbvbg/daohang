@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport"
+			content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>导航</title>
+
+		<script src="js/jquery.js"></script>
+
+		<link href="css/bootstrap.min.css" rel="stylesheet" />
+		<script src="js/bootstrap.min.js"></script>
+
+		<script src="js/mui.min.js"></script>
+
+
+		<link href="css/bootstrap-dialog.min.css" rel="stylesheet" />
+		<script src="js/bootstrap-dialog.min.js"></script>
+
+		<script src="js/BASE64.js"></script>
+		<script src="js/api.js"></script>
+
+		<style>
+			.item {
+				text-align: center;
+				padding-top: 10px;
+			}
+
+			#add {
+				width: 35px;
+				height: 35px;
+			}
+			.icon{
+				width: 35px;
+				height: 35px;
+				background-color: white;
+				padding: 5px;
+				border-radius: 5px;
+			}
+			.title{
+				padding-top: 5px;
+			}
+
+			.bootstrap-dialog.type-primary .modal-header {
+				background-color: #ffffff;
+			}
+
+			.modal-content {
+				border: 0;
+			}
+
+			.modal {
+				position: fixed;
+				top: auto;
+				right: 0;
+				bottom: 45%;
+				left: 0;
+				z-index: 1050;
+				display: none;
+				overflow: hidden;
+				-webkit-overflow-scrolling: touch;
+				outline: 0;
+			}
+
+			.bootstrap-dialog .bootstrap-dialog-title {
+				color: #000000;
+			}
+		</style>
+		<script type="text/javascript" charset="utf-8">
+			$(function() {
+				try {
+					var w = document.documentElement.clientWidth || document.body.clientWidth;
+					var h = document.documentElement.clientHeight || document.body.clientHeight;
+					$(".container").width(w - 50);
+					$(".container").height(h);
+
+					$(".container").click(function(event) {
+						showAdd();
+					});
+
+					var exists = getFileExists(db_file);
+					console.log(db_file + " exists :" + exists)
+					if (exists) {} else {
+						createFile(db_file)
+					}
+
+					getFileContents(db_file);
+					
+					var obj=eval('('+fileContents+')')
+					
+
+					if (fileContents == "{}") { //第一次
+					} else {
+						var arr=obj.items;
+						for (var i = 0; i < arr.length; i++) {
+							var item=arr[i];
+							var icon='<div><img class="icon" src="'+item.url+'/favicon.ico" /></div>';
+							var value='<input url type="hidden" value="'+item.url+'" />';
+							var label='<label class="title">'+item.title+'</label>';
+							var div="<div class='col-xs-3 col-sm-2 item'>"+icon+value+label+"</div>";
+							$(".row").append(div);
+						}
+						
+					}
+
+					$(".item").on("click", function(event) {
+						event.stopPropagation();
+						toUrl(event);
+					});
+
+
+					document.title = "aab导航"
+				} catch (e) {
+					alert(e)
+				}
+			})
+
+			var show = false;
+
+			function showAdd() {
+				show = !show;
+				console.log(show);
+				if (show) {
+					var icon = "<div><img id='add' src='img/add.png' /></div>"
+					var label = "<label></label>"
+					var div = "<div class='col-xs-3 col-sm-2 item add' >" + icon + label + "</div>";
+					$(".row").append(div);
+					$("#add").click(function(event) {
+						event.stopPropagation();
+						add()
+					});
+				} else {
+					$(".add").remove();
+				}
+			}
+			
+			function addItem(item){
+					saveFile(db_file, item);
+					window.location.reload();
+			}
+
+			function add() {
+				BootstrapDialog.show({
+					title: '添加网站',
+					message: $("<div></div>").load("add.html"),
+					buttons: [{
+						label: '保存',
+						cssClass: 'btn-primary',
+						action: function(dialog) {
+							var title=dialog.$modalContent.find("#title").val();
+							var url=dialog.$modalContent.find("#url").val();
+							if(title.length*url.length>0){
+								var item={};
+								item.title=title;
+								item.url=url;
+								addItem(item)
+								dialog.close();
+							}
+						}
+					}, {
+						label: '取消',
+						action: function(dialog) {
+							dialog.close();
+						}
+					}, ]
+				});
+
+			}
+
+			function toUrl(event) {
+				var dom = event.currentTarget;
+				var url = $(dom).find("input[url]").val();
+
+				var link = document.createElement('a');
+				link.setAttribute('rel', 'noopener noreferrer');
+				link.setAttribute('target', 'about:blank');
+				link.setAttribute('href', url);
+				link.click();
+
+				// window.open(url);
+			}
+		</script>
+	</head>
+	<body style="background-color: #f5f5f5;">
+		<div class="container">
+			<div class="row">
+				<!-- <div class='col-xs-3 col-sm-2 item'>
+					<div><img src="https://g.csdnimg.cn/static/logo/favicon32.ico" /></div>
+					<input url type="hidden" value="https://www.csdn.com" />
+					<label>csdn</label>
+				</div> -->
+			</div>
+		</div>
+	</body>
+</html>
